@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
+
+pi = np.pi
+
+def Find_RefractedAngle(theta_i, n_i, n_t):
+    if n_i / n_t * np.sin(theta_i) <= 1:
+        return np.arcsin(n_i / n_t * np.sin(theta_i))
+    else:
+        return pi - theta_i
+
+def plot_refraction(theta_i, n_i, n_t):
+    fig, ax = plt.subplots()
+    plt.subplots_adjust(bottom=0.25)
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    ax.set_aspect('equal', adjustable='box')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title('Refraction Simulation')
+    ax.grid(True)
+
+    line_incident, = ax.plot([], [], 'b', label='Incident')
+    line_refracted, = ax.plot([], [], 'r', label='Refracted')
+    line_normal, = ax.plot([0, 0], [1, -1], 'black', label='Normal')
+
+    slider_ax = plt.axes([0.2, 0.1, 0.6, 0.05])
+    slider_incident = Slider(slider_ax, "incident", 0, 90, valinit=np.degrees(theta_i), valstep = 1/4)
+
+    def update(val):
+        theta_i = np.radians(val)
+        theta_r = Find_RefractedAngle(theta_i, n_i, n_t)
+
+        x_i = -np.sin(theta_i)
+        y_i = -np.cos(theta_i)
+        x_r = np.sin(theta_r)
+        y_r = np.cos(theta_r)
+
+        line_incident.set_data([0, x_i], [0, y_i])
+        line_refracted.set_data([0, x_r], [0, y_r])
+
+        fig.canvas.draw()
+
+    update(np.degrees(theta_i))
+
+    slider_incident.on_changed(update)
+
+    plt.legend()
+    plt.show()
+
+# 입력 받기
+theta_i = float(input("입사각을 입력하세요 (단위: degrees): "))
+n_i = float(input("입사 매질의 굴절률을 입력하세요: "))
+n_t = float(input("굴절 매질의 굴절률을 입력하세요: "))
+
+# 입사각을 라디안으로 변환
+theta_i = np.radians(theta_i)
+
+# 굴절과 굴절률 시각화
+plot_refraction(theta_i, n_i, n_t)
